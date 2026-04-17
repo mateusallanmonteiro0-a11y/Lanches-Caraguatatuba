@@ -1,11 +1,10 @@
-const mercadopago = require('mercadopago');
+const { MercadoPagoConfig, Preference } = require('mercadopago');
 
 exports.handler = async (event) => {
-  // Habilita CORS
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS'
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
   };
 
   if (event.httpMethod === 'OPTIONS') {
@@ -13,51 +12,84 @@ exports.handler = async (event) => {
   }
 
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, headers, body: 'Method Not Allowed' };
+    return {
+      statusCode: 405,
+      headers,
+      body: JSON.stringify({ error: 'Method not allowed' }),
+    };
   }
 
   try {
-    // Obter access token da variável de ambiente configurada no Netlify
     const accessToken = process.env.MP_ACCESS_TOKEN;
     if (!accessToken) {
-      throw new Error('MP_ACCESS_TOKEN não configurado no ambiente do Netlify.');
+      console.error('MP_ACCESS_TOKEN não configurado');
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ error: 'Token do Mercado Pago não configurado no servidor' }),
+      };
     }
 
-    mercadopago.configure({ access_token: accessToken });
+    // Inicializa o cliente (nova forma)
+    const client = new MercadoPagoConfig({ accessToken });
+    const preferenceClient = new Preference(client);
 
-    const { items, payer, metadata, external_reference } = JSON.parse(event.body);
-
-    // Validação básica
-    if (!items || !items.length) {
-      return { statusCode: 400, headers, body: JSON.stringify({ message: 'Carrinho vazio' }) };
+    let body;
+    try {
+      body = JSON.parse(event.body || '{}');
+    } catch (err) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'Corpo da requisição inválido' }),
+      };
     }
 
-    const preference = {
-      items,
-      payer,
+    const { items, payer, metadata, external_reference } = body;
+
+    if (!items || items.length === 0) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'Carrinho vazio' }),
+      };
+    }
+
+    // Monta a preferência conforme documentação v2
+    const preferenceData = {
+      items: items.map((item) => ({
+        title: item.title,
+        quantity: Number(item.quantity),
+        unit_price: Number(item.unit_price),
+        currency_id: 'BRL',
+      })),
+      payer: {
+        name: payer?.name || 'Cliente',
+        email: payer?.email || 'cliente@email.com',
+      },
       back_urls: {
         success: `${process.env.URL || 'https://' + event.headers.host}/?pagamento=sucesso`,
         failure: `${process.env.URL || 'https://' + event.headers.host}/?pagamento=falha`,
-        pending: `${process.env.URL || 'https://' + event.headers.host}/?pagamento=pending`
+        pending: `${process.env.URL || 'https://' + event.headers.host}/?pagamento=pending`,
       },
       auto_return: 'approved',
       external_reference: external_reference || `pedido_${Date.now()}`,
       metadata: metadata || {},
-      notification_url: `${process.env.URL || 'https://' + event.headers.host}/.netlify/functions/webhook` // opcional
     };
 
-    const response = await mercadopago.preferences.create(preference);
+    const response = await preferenceClient.create({ body: preferenceData });
+
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ init_point: response.body.init_point })
+      body: JSON.stringify({ init_point: response.init_point }),
     };
   } catch (error) {
     console.error('Erro no Mercado Pago:', error);
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ message: error.message || 'Erro interno ao criar preferência' })
+      body: JSON.stringify({ error: error.message || 'Erro interno ao criar preferência' }),
     };
   }
 };
