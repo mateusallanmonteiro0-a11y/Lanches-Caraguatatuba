@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Lanchão Caraguá - Peça com Pagamento Online (Mercado Pago)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { background: #fefaf5; color: #2c241a; }
+    .header { background: linear-gradient(135deg, #25D366, #128C7E); color: white; padding: 1.5rem 2rem; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+    .header-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .logo h1 { font-size: 1.8rem; font-weight: 700; }
+    .logo p { font-size: 0.9rem; opacity: 0.9; margin-top: 6px; }
+    .badge-local { background: rgba(255,255,240,0.2); padding: 0.4rem 1rem; border-radius: 40px; font-size: 0.9rem; }
+    .main-container { max-width: 1400px; margin: 2rem auto; padding: 0 1.5rem; display: flex; flex-wrap: wrap; gap: 2rem; }
+    .products-section { flex: 2; min-width: 260px; }
+    .section-title { font-size: 1.8rem; font-weight: 700; background: linear-gradient(135deg, #d13f1f, #b94424); background-clip: text; -webkit-background-clip: text; color: transparent; }
+    .menu-sub { color: #7f6b5c; border-left: 3px solid #d13f1f; padding-left: 1rem; margin: 0.5rem 0 1.5rem; }
+    .category-title { font-size: 1.5rem; font-weight: 600; margin: 1.8rem 0 1rem; border-bottom: 2px solid #ffddd0; display: flex; align-items: center; gap: 10px; }
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.8rem; }
+    .product-card { background: white; border-radius: 28px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.05); border: 1px solid #ffe0cc; transition: 0.2s; }
+    .product-card:hover { transform: translateY(-5px); box-shadow: 0 18px 30px rgba(0,0,0,0.1); }
+    .product-img { width: 100%; height: 170px; object-fit: cover; background: #f7e3d4; }
+    .product-info { padding: 1rem; }
+    .product-name { font-weight: 700; font-size: 1.2rem; }
+    .product-desc { font-size: 0.8rem; color: #7f6b5c; margin: 0.4rem 0; }
+    .price-add { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; }
+    .product-price { font-weight: 800; font-size: 1.3rem; color: #c2410c; }
+    .add-to-cart { background: #d13f1f; border: none; color: white; padding: 8px 14px; border-radius: 40px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    .add-to-cart:hover { background: #a83112; }
+    .cart-payment { flex: 1.2; min-width: 320px; background: white; border-radius: 28px; padding: 1.5rem; box-shadow: 0 12px 28px rgba(0,0,0,0.08); border: 1px solid #ffe0cc; position: sticky; top: 1.5rem; height: fit-content; }
+    .cart-header { display: flex; justify-content: space-between; border-bottom: 2px solid #f1e2d6; padding-bottom: 0.8rem; margin-bottom: 1rem; }
+    .clear-cart { background: none; border: none; color: #b95a3a; cursor: pointer; }
+    .cart-items { max-height: 320px; overflow-y: auto; margin-bottom: 1rem; }
+    .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid #f5e4da; }
+    .cart-item-qty { display: flex; align-items: center; gap: 6px; background: #fef3ec; padding: 4px 8px; border-radius: 40px; }
+    .qty-btn { background: white; border: none; width: 26px; height: 26px; border-radius: 30px; font-weight: bold; cursor: pointer; color: #c2410c; }
+    .cart-total { display: flex; justify-content: space-between; font-weight: 800; font-size: 1.3rem; border-top: 2px dashed #f1d9cd; padding-top: 1rem; margin: 0.5rem 0 1rem; }
+    .payment-divider { display: flex; align-items: center; gap: 10px; margin: 1rem 0; color: #b28b72; font-size: 0.7rem; }
+    .payment-divider hr { flex: 1; border: none; height: 1px; background: #f0dbcf; }
+    .mercadopago-btn { background: linear-gradient(135deg, #009ee3, #0079c1); color: white; border: none; width: 100%; padding: 14px; font-weight: 700; border-radius: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 8px; }
+    .whatsapp-btn { background: #25D366; color: white; border: none; width: 100%; padding: 14px; font-weight: 700; border-radius: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 8px; }
+    .form-group { margin-bottom: 0.9rem; }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px 12px; border-radius: 18px; border: 1.5px solid #f0dbcf; background: #fffdfb; }
+    .status-msg { margin-top: 12px; text-align: center; font-size: 0.8rem; }
+    .empty-cart-msg { text-align: center; color: #b28b72; padding: 1.5rem 0; }
+    footer { background: #2c241a; color: #e2cfc0; text-align: center; padding: 1.8rem; margin-top: 3rem; }
+    @media (max-width: 900px) { .main-container { flex-direction: column; } .cart-payment { position: static; } }
+  </style>
+</head>
+<body>
+<div class="header">
+  <div class="header-content">
+    <div class="logo"><h1><i class="fab fa-whatsapp"></i> Lanchão Caraguá</h1><p><i class="fas fa-map-marker-alt"></i> Caraguatatuba - Centro, Praia e Região</p></div>
+    <div class="badge-local"><i class="fab fa-whatsapp"></i> Peça pelo WhatsApp | Pagamento Online com Mercado Pago</div>
+  </div>
+</div>
+
+<div class="main-container">
+  <div class="products-section">
+    <div class="section-title"><i class="fas fa-scroll"></i> Cardápio Online</div>
+    <div class="menu-sub">Escolha seus lanches, adicione ao carrinho e finalize com pagamento online (Pix, cartão, boleto) ou WhatsApp.</div>
+    <div id="categories-container"></div>
+  </div>
+
+  <div class="cart-payment">
+    <div class="cart-header"><h3><i class="fas fa-shopping-bag"></i> Seu Pedido</h3><button class="clear-cart" id="clearCartBtn"><i class="fas fa-trash-alt"></i> Limpar</button></div>
+    <div id="cartItemsContainer" class="cart-items"><div class="empty-cart-msg">Seu carrinho está vazio 🍔</div></div>
+    <div class="cart-total"><span>Total</span><span id="cartTotalValue">R$ 0,00</span></div>
+
+    <div class="form-group"><label><i class="fas fa-map-pin"></i> Endereço de entrega</label><input type="text" id="deliveryAddress" placeholder="Rua, número, bairro" value="Av. São Francisco, 300 - Centro"></div>
+    <div class="form-group"><label><i class="fas fa-user"></i> Seu nome</label><input type="text" id="customerName" placeholder="Nome completo" value="Cliente"></div>
+    <div class="form-group"><label><i class="fas fa-envelope"></i> E-mail (para pagamento online)</label><input type="email" id="customerEmail" placeholder="seuemail@exemplo.com" value="cliente@email.com"></div>
+    <div class="form-group"><label><i class="fas fa-comment-dots"></i> Observações</label><textarea id="orderNotes" rows="2" placeholder="Ex: sem cebola, talheres..."></textarea></div>
+
+    <div class="payment-divider"><hr><span>Pagamento Online com Mercado Pago</span><hr></div>
+    <div class="form-group"><label><i class="fas fa-credit-card"></i> Método preferencial</label>
+      <select id="mpPaymentMethod"><option value="pix">Pix</option><option value="credit_card">Cartão de Crédito</option><option value="debit_card">Cartão de Débito</option><option value="ticket">Boleto</option></select>
+    </div>
+    <button id="mercadopagoBtn" class="mercadopago-btn"><i class="fab fa-mercadopago"></i> Pagar com Mercado Pago</button>
+    <div id="mpStatus" class="status-msg"></div>
+
+    <div class="payment-divider"><hr><span>Ou peça pelo WhatsApp</span><hr></div>
+    <button id="whatsappOrderBtn" class="whatsapp-btn"><i class="fab fa-whatsapp fa-lg"></i> Enviar Pedido via WhatsApp</button>
+    <div id="paymentStatus" class="status-msg"></div>
+    <div style="font-size:0.7rem; text-align:center; margin-top:10px;"><i class="fas fa-shield-alt"></i> Pagamento seguro com Mercado Pago</div>
+  </div>
+</div>
+<footer><i class="fab fa-whatsapp"></i> Lanchão Caraguá - Entregamos em Caraguatatuba. Pagamento: Pix, cartão, boleto ou dinheiro.</footer>
+
+<script>
+  // ======================= CARDÁPIO =======================
+  const produtos = [
+    { id: 1, nome: "X-Salada Especial", descricao: "Hambúrguer 150g, alface, tomate, queijo mussarela", preco: 22.90, categoria: "hamburgueres", imagem: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&h=180&fit=crop" },
+    { id: 2, nome: "X-Bacon Supreme", descricao: "Duas carnes, bacon crocante, cheddar", preco: 28.90, categoria: "hamburgueres", imagem: "https://images.unsplash.com/photo-1553979459-d2229ba7433a?w=300&h=180&fit=crop" },
+    { id: 3, nome: "Cheddar Duplo", descricao: "Pão australiano, blend de cheddar, onion rings", preco: 32.90, categoria: "hamburgueres", imagem: "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=300&h=180&fit=crop" },
+    { id: 7, nome: "Veggie Burger", descricao: "Hambúrguer de grão-de-bico, queijo vegano", preco: 26.90, categoria: "hamburgueres", imagem: "https://images.unsplash.com/photo-1525059696034-4967a8e1dca2?w=300&h=180&fit=crop" },
+    { id: 4, nome: "Hot Dog Completo", descricao: "Salsão, purê, vinagrete, batata palha", preco: 16.90, categoria: "especiais", imagem: "https://images.unsplash.com/photo-1613828364875-5317093d6e20?w=300&h=180&fit=crop" },
+    { id: 8, nome: "X-Frango com Catupiry", descricao: "Peito de frango desfiado, catupiry", preco: 24.90, categoria: "especiais", imagem: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=300&h=180&fit=crop" },
+    { id: 5, nome: "Batata Frita com Cheddar", descricao: "Batata rústica com cheddar e bacon", preco: 14.90, categoria: "porcoes", imagem: "https://images.unsplash.com/photo-1630384060421-cb20f0e0649d?w=300&h=180&fit=crop" },
+    { id: 9, nome: "Onion Rings", descricao: "Anéis de cebola empanados", preco: 16.90, categoria: "porcoes", imagem: "https://images.unsplash.com/photo-1639024471283-af188151b8be?w=300&h=180&fit=crop" },
+    { id: 10, nome: "Nuggets de Frango", descricao: "10 unidades com molho agridoce", preco: 19.90, categoria: "porcoes", imagem: "https://images.unsplash.com/photo-1562967916-eb82221c8f3b?w=300&h=180&fit=crop" },
+    { id: 6, nome: "Milkshake de Chocolate", descricao: "Com calda e chantilly", preco: 15.90, categoria: "bebidas", imagem: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=300&h=180&fit=crop" },
+    { id: 11, nome: "Refrigerante Lata", descricao: "Coca, Guaraná, Fanta", preco: 6.90, categoria: "bebidas", imagem: "https://images.unsplash.com/photo-1581006852262-e4307cf6283a?w=300&h=180&fit=crop" },
+    { id: 12, nome: "Suco Natural", descricao: "Laranja, limão ou maracujá (500ml)", preco: 8.90, categoria: "bebidas", imagem: "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=300&h=180&fit=crop" },
+    { id: 13, nome: "Petit Gateau", descricao: "Com sorvete de baunilha", preco: 13.90, categoria: "bebidas", imagem: "https://images.unsplash.com/photo-1624353364406-3f6974b1dac5?w=300&h=180&fit=crop" }
+  ];
+  const categorias = [
+    { id: "hamburgueres", nome: "🍔 Hambúrgueres Artesanais", icone: "fa-hamburger" },
+    { id: "especiais", nome: "🌭 Especiais & Sanduíches", icone: "fa-hotdog" },
+    { id: "porcoes", nome: "🍟 Porções & Acompanhamentos", icone: "fa-french-fries" },
+    { id: "bebidas", nome: "🥤 Bebidas & Sobremesas", icone: "fa-cocktail" }
+  ];
+
+  let carrinho = [];
+  const NUMERO_WHATSAPP = "551498256250";
+
+  // Elementos DOM
+  const categoriesContainer = document.getElementById('categories-container');
+  const cartContainer = document.getElementById('cartItemsContainer');
+  const cartTotalSpan = document.getElementById('cartTotalValue');
+  const clearCartBtn = document.getElementById('clearCartBtn');
+  const whatsappBtn = document.getElementById('whatsappOrderBtn');
+  const paymentStatusDiv = document.getElementById('paymentStatus');
+  const mpStatusDiv = document.getElementById('mpStatus');
+  const deliveryAddressInput = document.getElementById('deliveryAddress');
+  const customerNameInput = document.getElementById('customerName');
+  const customerEmailInput = document.getElementById('customerEmail');
+  const orderNotesInput = document.getElementById('orderNotes');
+  const mercadopagoBtn = document.getElementById('mercadopagoBtn');
+  const mpPaymentMethod = document.getElementById('mpPaymentMethod');
+
+  // Renderizar cardápio
+  function renderCardapio() {
+    categoriesContainer.innerHTML = '';
+    for (let cat of categorias) {
+      const produtosDaCategoria = produtos.filter(p => p.categoria === cat.id);
+      if (!produtosDaCategoria.length) continue;
+      const catDiv = document.createElement('div');
+      catDiv.innerHTML = `<div class="category-title"><i class="fas ${cat.icone}"></i> ${cat.nome}</div><div class="products-grid" data-cat="${cat.id}"></div>`;
+      categoriesContainer.appendChild(catDiv);
+      const grid = catDiv.querySelector('.products-grid');
+      produtosDaCategoria.forEach(prod => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <img class="product-img" src="${prod.imagem}" alt="${prod.nome}" onerror="this.src='https://placehold.co/300x180?text=Lanches'">
+          <div class="product-info">
+            <div class="product-name">${prod.nome}</div>
+            <div class="product-desc">${prod.descricao}</div>
+            <div class="price-add"><span class="product-price">R$ ${prod.preco.toFixed(2)}</span><button class="add-to-cart" data-id="${prod.id}"><i class="fas fa-cart-plus"></i> Adicionar</button></div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+    document.querySelectorAll('.add-to-cart').forEach(btn => btn.addEventListener('click', (e) => {
+      const id = parseInt(btn.getAttribute('data-id'));
+      const produto = produtos.find(p => p.id === id);
+      if (produto) adicionarAoCarrinho(produto);
+    }));
+  }
+
+  function adicionarAoCarrinho(produto) {
+    const existente = carrinho.find(i => i.id === produto.id);
+    if (existente) existente.quantidade++;
+    else carrinho.push({ ...produto, quantidade: 1 });
+    atualizarCarrinhoUI();
+    mostrarStatusTemp(`${produto.nome} adicionado!`, "sucesso", paymentStatusDiv);
+  }
+
+  function atualizarCarrinhoUI() {
+    const total = carrinho.reduce((s, i) => s + i.preco * i.quantidade, 0);
+    cartTotalSpan.innerText = `R$ ${total.toFixed(2)}`;
+    if (!carrinho.length) {
+      cartContainer.innerHTML = '<div class="empty-cart-msg">Seu carrinho está vazio 🍔</div>';
+      return;
+    }
+    let html = '';
+    carrinho.forEach(item => {
+      html += `
+        <div class="cart-item">
+          <div><div class="cart-item-name">${item.nome}</div><div class="cart-item-price">R$ ${item.preco.toFixed(2)}</div></div>
+          <div class="cart-item-qty"><button class="qty-btn dec" data-id="${item.id}">-</button><span>${item.quantidade}</span><button class="qty-btn inc" data-id="${item.id}">+</button></div>
+          <div>R$ ${(item.preco * item.quantidade).toFixed(2)}</div>
+          <button class="remove-item" data-id="${item.id}"><i class="fas fa-trash"></i></button>
+        </div>
+      `;
+    });
+    cartContainer.innerHTML = html;
+    document.querySelectorAll('.dec').forEach(btn => btn.addEventListener('click', (e) => alterarQuantidade(parseInt(btn.dataset.id), -1)));
+    document.querySelectorAll('.inc').forEach(btn => btn.addEventListener('click', (e) => alterarQuantidade(parseInt(btn.dataset.id), 1)));
+    document.querySelectorAll('.remove-item').forEach(btn => btn.addEventListener('click', (e) => removerItemCarrinho(parseInt(btn.dataset.id))));
+  }
+
+  function alterarQuantidade(id, delta) {
+    const idx = carrinho.findIndex(i => i.id === id);
+    if (idx !== -1) {
+      carrinho[idx].quantidade += delta;
+      if (carrinho[idx].quantidade <= 0) carrinho.splice(idx, 1);
+      atualizarCarrinhoUI();
+    }
+  }
+  function removerItemCarrinho(id) { carrinho = carrinho.filter(i => i.id !== id); atualizarCarrinhoUI(); }
+  function limparCarrinho() { carrinho = []; atualizarCarrinhoUI(); mostrarStatusTemp("Carrinho limpo", "info", paymentStatusDiv); }
+
+  function mostrarStatusTemp(msg, tipo, container) {
+    const color = tipo === 'sucesso' ? '#1f7a5a' : (tipo === 'erro' ? '#b85c3a' : '#b87a3a');
+    container.innerHTML = `<span style="color:${color}"><i class="fas ${tipo === 'sucesso' ? 'fa-check-circle' : 'fa-info-circle'}"></i> ${msg}</span>`;
+    setTimeout(() => { if (container.innerHTML.includes(msg)) container.innerHTML = ''; }, 4000);
+  }
+
+  // WhatsApp
+  function enviarPedidoWhatsApp() {
+    if (!carrinho.length) return mostrarStatusTemp("Carrinho vazio!", "erro", paymentStatusDiv);
+    const endereco = deliveryAddressInput.value.trim();
+    if (!endereco) return mostrarStatusTemp("Informe o endereço.", "erro", paymentStatusDiv);
+    const nome = customerNameInput.value.trim() || "Cliente";
+    const obs = orderNotesInput.value.trim();
+    const total = carrinho.reduce((s,i) => s + i.preco * i.quantidade, 0);
+    let itens = "";
+    carrinho.forEach(i => itens += `🍔 *${i.nome}* x${i.quantidade} = R$ ${(i.preco * i.quantidade).toFixed(2)}\n`);
+    const msg = `*NOVO PEDIDO - LANCHÃO CARAGUÁ* 🍔🍟\n\n👤 *Cliente:* ${nome}\n📍 *Endereço:* ${endereco}\n📦 *Itens:*\n${itens}\n💰 *Total:* R$ ${total.toFixed(2)}\n${obs ? `📝 *Obs:* ${obs}\n` : ''}\n🔔 Pagamento na entrega (dinheiro/cartão).`;
+    window.open(`https://wa.me/${NUMERO_WHATSAPP}?text=${encodeURIComponent(msg)}`, '_blank');
+    carrinho = []; atualizarCarrinhoUI();
+    mostrarStatusTemp("Pedido enviado! Aguarde contato.", "sucesso", paymentStatusDiv);
+  }
+
+  // Mercado Pago via Netlify Function
+  async function pagarComMercadoPago() {
+    if (!carrinho.length) return mostrarStatusTemp("Carrinho vazio!", "erro", mpStatusDiv);
+    const email = customerEmailInput.value.trim();
+    if (!email || !email.includes('@')) return mostrarStatusTemp("E-mail válido é obrigatório.", "erro", mpStatusDiv);
+    const nome = customerNameInput.value.trim() || "Cliente";
+    const endereco = deliveryAddressInput.value.trim();
+    const observacoes = orderNotesInput.value.trim();
+
+    const items = carrinho.map(item => ({
+      title: item.nome,
+      quantity: item.quantidade,
+      unit_price: item.preco,
+      currency_id: "BRL"
+    }));
+
+    const payload = {
+      items,
+      payer: { name: nome, email: email },
+      metadata: { endereco_entrega: endereco, observacoes, metodo_selecionado: mpPaymentMethod.value },
+      external_reference: `pedido_${Date.now()}`
+    };
+
+    try {
+      mpStatusDiv.innerHTML = '<span style="color:#0079c1;"><i class="fas fa-spinner fa-pulse"></i> Gerando pagamento...</span>';
+      const response = await fetch('/.netlify/functions/create-preference', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+      if (data.init_point) {
+        window.location.href = data.init_point;
+      } else {
+        throw new Error(data.message || "Erro ao criar preferência");
+      }
+    } catch (err) {
+      console.error(err);
+      mostrarStatusTemp("Erro: " + err.message, "erro", mpStatusDiv);
+    }
+  }
+
+  clearCartBtn.addEventListener('click', limparCarrinho);
+  whatsappBtn.addEventListener('click', enviarPedidoWhatsApp);
+  mercadopagoBtn.addEventListener('click', pagarComMercadoPago);
+  renderCardapio();
+  atualizarCarrinhoUI();
+</script>
+</body>
+</html>
