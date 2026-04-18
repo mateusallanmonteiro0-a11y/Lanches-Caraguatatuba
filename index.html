@@ -2,244 +2,178 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Lanchão Caraguá - Pagamento Online (Pix/Cartão)</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- Mercado Pago JS SDK -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lanchão Caraguá - Checkout Transparente</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- SDK do Mercado Pago para tokenização de cartão -->
   <script src="https://sdk.mercadopago.com/js/v2"></script>
   <style>
-    /* Estilos (mesmo do anterior, compactado) */
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-    body { background: #fefaf5; color: #2c241a; }
-    .header { background: linear-gradient(135deg, #25D366, #128C7E); color: white; padding: 1.5rem 2rem; }
-    .header-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
-    .logo h1 { font-size: 1.8rem; }
-    .badge-local { background: rgba(255,255,240,0.2); padding: 0.4rem 1rem; border-radius: 40px; }
-    .main-container { max-width: 1400px; margin: 2rem auto; padding: 0 1.5rem; display: flex; flex-wrap: wrap; gap: 2rem; }
-    .products-section { flex: 2; min-width: 260px; }
-    .cart-payment { flex: 1.2; min-width: 320px; background: white; border-radius: 28px; padding: 1.5rem; box-shadow: 0 12px 28px rgba(0,0,0,0.08); border: 1px solid #ffe0cc; position: sticky; top: 1.5rem; height: fit-content; }
-    .section-title { font-size: 1.8rem; font-weight: 700; background: linear-gradient(135deg, #d13f1f, #b94424); background-clip: text; -webkit-background-clip: text; color: transparent; }
-    .category-title { font-size: 1.5rem; font-weight: 600; margin: 1.8rem 0 1rem; border-bottom: 2px solid #ffddd0; }
-    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.8rem; }
-    .product-card { background: white; border-radius: 28px; overflow: hidden; border: 1px solid #ffe0cc; padding: 1rem; }
-    .product-img { width: 100%; height: 150px; object-fit: cover; border-radius: 20px; }
-    .product-name { font-weight: 700; font-size: 1.2rem; margin: 0.5rem 0 0.2rem; }
-    .price-add { display: flex; justify-content: space-between; align-items: center; margin-top: 0.8rem; }
-    .product-price { font-weight: 800; font-size: 1.3rem; color: #c2410c; }
-    .add-to-cart { background: #d13f1f; border: none; color: white; padding: 8px 14px; border-radius: 40px; cursor: pointer; }
-    .cart-header { display: flex; justify-content: space-between; margin-bottom: 1rem; }
-    .cart-items { max-height: 300px; overflow-y: auto; margin-bottom: 1rem; }
-    .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid #f5e4da; }
-    .cart-total { font-weight: 800; font-size: 1.3rem; border-top: 2px dashed #f1d9cd; padding-top: 0.8rem; margin: 0.5rem 0; }
-    .form-group { margin-bottom: 1rem; }
-    .form-group input, .form-group select { width: 100%; padding: 10px 12px; border-radius: 18px; border: 1.5px solid #f0dbcf; background: #fffdfb; }
-    .payment-method-tabs { display: flex; gap: 10px; margin-bottom: 1rem; }
-    .tab-btn { flex: 1; padding: 10px; background: #f0dbcf; border: none; border-radius: 40px; cursor: pointer; font-weight: 600; }
-    .tab-btn.active { background: #d13f1f; color: white; }
-    .pay-btn { background: #25D366; color: white; border: none; width: 100%; padding: 14px; font-weight: 700; border-radius: 50px; cursor: pointer; margin-top: 1rem; }
-    .status-msg { margin-top: 12px; text-align: center; font-size: 0.8rem; }
-    footer { background: #2c241a; color: #e2cfc0; text-align: center; padding: 1.5rem; margin-top: 2rem; }
-    @media (max-width: 900px) { .main-container { flex-direction: column; } .cart-payment { position: static; } }
-    .qr-code-area { text-align: center; margin-top: 1rem; }
-    .qr-code-area img { max-width: 200px; margin: 0 auto; }
+    body { background: #fefaf5; padding: 20px; }
+    .container { max-width: 1200px; margin: auto; display: flex; flex-wrap: wrap; gap: 2rem; }
+    .cardapio { flex: 2; }
+    .checkout { flex: 1.5; background: white; border-radius: 28px; padding: 1.5rem; box-shadow: 0 12px 28px rgba(0,0,0,0.08); }
+    .produto { background: white; border-radius: 20px; padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid #ffe0cc; }
+    .carrinho-item { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #eee; }
+    button { background: #d13f1f; color: white; border: none; padding: 8px 16px; border-radius: 40px; cursor: pointer; font-weight: 600; }
+    .pagamento-tabs { display: flex; gap: 10px; margin: 1rem 0; }
+    .tab { flex: 1; text-align: center; padding: 10px; background: #f0dbcf; border-radius: 40px; cursor: pointer; }
+    .tab.active { background: #d13f1f; color: white; }
+    .qr-code { text-align: center; margin-top: 1rem; }
+    input, select { width: 100%; padding: 10px; margin: 8px 0; border-radius: 18px; border: 1.5px solid #f0dbcf; }
+    .status { margin-top: 1rem; text-align: center; font-size: 0.9rem; }
+    h2 { margin-bottom: 1rem; }
   </style>
 </head>
 <body>
-<div class="header">
-  <div class="header-content">
-    <div class="logo"><h1><i class="fab fa-whatsapp"></i> Lanchão Caraguá</h1><p><i class="fas fa-map-marker-alt"></i> Caraguatatuba</p></div>
-    <div class="badge-local"><i class="fab fa-whatsapp"></i> Pagamento Online (Pix/Cartão)</div>
+<div class="container">
+  <div class="cardapio">
+    <h2>🍔 Cardápio</h2>
+    <div id="produtos"></div>
+  </div>
+  <div class="checkout">
+    <h2>🛒 Seu Pedido</h2>
+    <div id="carrinho"></div>
+    <div id="total" style="font-weight: bold; margin: 1rem 0;"></div>
+    <input type="text" id="nome" placeholder="Seu nome completo">
+    <input type="email" id="email" placeholder="Seu e-mail">
+    <input type="text" id="endereco" placeholder="Endereço de entrega">
+
+    <div class="pagamento-tabs">
+      <div class="tab active" data-method="pix">Pix</div>
+      <div class="tab" data-method="card">Cartão (Crédito/Débito)</div>
+    </div>
+
+    <div id="pix-area">
+      <div id="qr-code-container" class="qr-code"></div>
+      <input type="text" id="pix-copia-cola" readonly placeholder="Código Pix aparecerá aqui" style="background:#f9f2ec;">
+    </div>
+
+    <div id="card-area" style="display:none;">
+      <select id="paymentMethodId">
+        <option value="visa">Visa</option>
+        <option value="master">Mastercard</option>
+        <option value="amex">American Express</option>
+        <option value="elo">Elo</option>
+        <option value="hipercard">Hipercard</option>
+      </select>
+      <input type="text" id="cardNumber" placeholder="Número do cartão" maxlength="16">
+      <div style="display: flex; gap: 10px;">
+        <input type="text" id="expMonth" placeholder="Mês (MM)" maxlength="2">
+        <input type="text" id="expYear" placeholder="Ano (AAAA)" maxlength="4">
+        <input type="text" id="cvv" placeholder="CVV" maxlength="4">
+      </div>
+      <input type="text" id="cardholderName" placeholder="Nome no cartão">
+      <input type="text" id="docNumber" placeholder="CPF (apenas números)">
+      <input type="text" id="installments" placeholder="Parcelas" value="1">
+    </div>
+
+    <button id="pagarBtn" style="width:100%; margin-top:1rem;">Pagar Agora</button>
+    <div id="status" class="status"></div>
   </div>
 </div>
-
-<div class="main-container">
-  <div class="products-section">
-    <div class="section-title">Cardápio Online</div>
-    <div id="categories-container"></div>
-  </div>
-
-  <div class="cart-payment">
-    <div class="cart-header"><h3><i class="fas fa-shopping-bag"></i> Seu Pedido</h3><button id="clearCartBtn" style="background:none;border:none;color:#b95a3a;">Limpar</button></div>
-    <div id="cartItemsContainer"><div class="empty-cart-msg" style="text-align:center;color:#b28b72;">Carrinho vazio</div></div>
-    <div class="cart-total"><span>Total</span><span id="cartTotalValue">R$ 0,00</span></div>
-
-    <div class="form-group"><input type="text" id="customerName" placeholder="Seu nome completo"></div>
-    <div class="form-group"><input type="email" id="customerEmail" placeholder="Seu e-mail (obrigatório)"></div>
-    <div class="form-group"><input type="text" id="deliveryAddress" placeholder="Endereço de entrega"></div>
-
-    <div class="payment-method-tabs">
-      <button class="tab-btn active" data-method="pix">Pix</button>
-      <button class="tab-btn" data-method="card">Cartão (Crédito/Débito)</button>
-    </div>
-
-    <!-- Área Pix -->
-    <div id="pixArea">
-      <div class="form-group"><label>Chave Pix (gerada automaticamente)</label><input type="text" id="pixQrCode" readonly placeholder="QR Code será exibido" style="background:#f9f2ec;"></div>
-      <div id="pixQrCodeImage" class="qr-code-area"></div>
-    </div>
-
-    <!-- Área Cartão (oculta inicialmente) -->
-    <div id="cardArea" style="display:none;">
-      <div class="form-group"><select id="paymentMethodId"><option value="visa">Visa</option><option value="master">Mastercard</option><option value="amex">American Express</option><option value="elo">Elo</option><option value="hipercard">Hipercard</option></select></div>
-      <div class="form-group"><input type="text" id="cardNumber" placeholder="Número do cartão" maxlength="16"></div>
-      <div class="form-group" style="display:flex; gap:10px;"><input type="text" id="cardExpMonth" placeholder="Mês (MM)" maxlength="2" style="width:33%;"><input type="text" id="cardExpYear" placeholder="Ano (AAAA)" maxlength="4" style="width:33%;"><input type="text" id="cardCvv" placeholder="CVV" maxlength="4" style="width:33%;"></div>
-      <div class="form-group"><input type="text" id="cardholderName" placeholder="Nome no cartão"></div>
-      <div class="form-group"><input type="text" id="installments" placeholder="Parcelas (1 a 12)" value="1"></div>
-      <div class="form-group"><input type="text" id="docNumber" placeholder="CPF (apenas números)"></div>
-    </div>
-
-    <button id="payButton" class="pay-btn"><i class="fas fa-credit-card"></i> Pagar Agora</button>
-    <div id="paymentStatus" class="status-msg"></div>
-  </div>
-</div>
-<footer>Lanchão Caraguá - Pagamento processado com segurança via Mercado Pago. Pix, cartão crédito/débito.</footer>
 
 <script>
-  // ======================= CARDÁPIO E CARRINHO (mesmo do exemplo anterior) =======================
+  // ======================== PRODUTOS ========================
   const produtos = [
-    { id: 1, nome: "X-Salada Especial", descricao: "Hambúrguer 150g, alface, tomate, queijo", preco: 22.90, categoria: "hamburgueres", imagem: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&h=180&fit=crop" },
-    { id: 2, nome: "X-Bacon Supreme", descricao: "Duas carnes, bacon crocante, cheddar", preco: 28.90, categoria: "hamburgueres", imagem: "https://images.unsplash.com/photo-1553979459-d2229ba7433a?w=300&h=180&fit=crop" },
-    { id: 3, nome: "Cheddar Duplo", descricao: "Pão australiano, cheddar, onion rings", preco: 32.90, categoria: "hamburgueres", imagem: "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=300&h=180&fit=crop" },
-    { id: 4, nome: "Hot Dog Completo", descricao: "Salsão, purê, vinagrete, batata palha", preco: 16.90, categoria: "especiais", imagem: "https://images.unsplash.com/photo-1613828364875-5317093d6e20?w=300&h=180&fit=crop" },
-    { id: 5, nome: "Batata Frita com Cheddar", descricao: "Batata rústica com cheddar e bacon", preco: 14.90, categoria: "porcoes", imagem: "https://images.unsplash.com/photo-1630384060421-cb20f0e0649d?w=300&h=180&fit=crop" },
-    { id: 6, nome: "Milkshake de Chocolate", descricao: "Com calda e chantilly", preco: 15.90, categoria: "bebidas", imagem: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=300&h=180&fit=crop" },
-    { id: 7, nome: "Refrigerante Lata", descricao: "Coca, Guaraná, Fanta", preco: 6.90, categoria: "bebidas", imagem: "https://images.unsplash.com/photo-1581006852262-e4307cf6283a?w=300&h=180&fit=crop" }
+    { id: 1, nome: "X-Salada Especial", preco: 22.90 },
+    { id: 2, nome: "X-Bacon Supreme", preco: 28.90 },
+    { id: 3, nome: "Cheddar Duplo", preco: 32.90 },
+    { id: 4, nome: "Hot Dog Completo", preco: 16.90 },
+    { id: 5, nome: "Batata Frita com Cheddar", preco: 14.90 },
+    { id: 6, nome: "Milkshake de Chocolate", preco: 15.90 }
   ];
-  const categorias = [
-    { id: "hamburgueres", nome: "🍔 Hambúrgueres" },
-    { id: "especiais", nome: "🌭 Especiais" },
-    { id: "porcoes", nome: "🍟 Porções" },
-    { id: "bebidas", nome: "🥤 Bebidas" }
-  ];
-
   let carrinho = [];
 
-  // Renderização do cardápio
-  function renderCardapio() {
-    const container = document.getElementById('categories-container');
-    container.innerHTML = '';
-    for (let cat of categorias) {
-      const prods = produtos.filter(p => p.categoria === cat.id);
-      if (!prods.length) continue;
-      const catDiv = document.createElement('div');
-      catDiv.innerHTML = `<div class="category-title">${cat.nome}</div><div class="products-grid" data-cat="${cat.id}"></div>`;
-      container.appendChild(catDiv);
-      const grid = catDiv.querySelector('.products-grid');
-      prods.forEach(prod => {
-        const card = document.createElement('div');
-        card.className = 'product-card';
-        card.innerHTML = `
-          <img class="product-img" src="${prod.imagem}" onerror="this.src='https://placehold.co/300x180?text=Lanches'">
-          <div class="product-name">${prod.nome}</div>
-          <div class="product-desc" style="font-size:0.8rem; color:#7f6b5c;">${prod.descricao}</div>
-          <div class="price-add"><span class="product-price">R$ ${prod.preco.toFixed(2)}</span><button class="add-to-cart" data-id="${prod.id}">+ Adicionar</button></div>
-        `;
-        grid.appendChild(card);
-      });
-    }
-    document.querySelectorAll('.add-to-cart').forEach(btn => btn.addEventListener('click', (e) => {
-      const id = parseInt(btn.dataset.id);
-      const prod = produtos.find(p => p.id === id);
-      if (prod) adicionarAoCarrinho(prod);
-    }));
+  function renderProdutos() {
+    const div = document.getElementById('produtos');
+    div.innerHTML = produtos.map(p => `
+      <div class="produto">
+        <span><strong>${p.nome}</strong> - R$ ${p.preco.toFixed(2)}</span>
+        <button onclick="adicionar(${p.id})">Adicionar</button>
+      </div>
+    `).join('');
   }
 
-  function adicionarAoCarrinho(prod) {
-    const existente = carrinho.find(i => i.id === prod.id);
-    if (existente) existente.quantidade++;
-    else carrinho.push({ ...prod, quantidade: 1 });
-    atualizarCarrinhoUI();
+  function adicionar(id) {
+    const prod = produtos.find(p => p.id === id);
+    const item = carrinho.find(i => i.id === id);
+    if (item) item.qtd++;
+    else carrinho.push({ ...prod, qtd: 1 });
+    renderCarrinho();
   }
 
-  function atualizarCarrinhoUI() {
-    const total = carrinho.reduce((s,i) => s + i.preco * i.quantidade, 0);
-    document.getElementById('cartTotalValue').innerText = `R$ ${total.toFixed(2)}`;
-    const cartContainer = document.getElementById('cartItemsContainer');
-    if (!carrinho.length) {
-      cartContainer.innerHTML = '<div style="text-align:center;color:#b28b72;">Carrinho vazio</div>';
+  function renderCarrinho() {
+    const div = document.getElementById('carrinho');
+    if (carrinho.length === 0) {
+      div.innerHTML = 'Carrinho vazio';
+      document.getElementById('total').innerHTML = '';
       return;
     }
     let html = '';
+    let total = 0;
     carrinho.forEach(item => {
-      html += `<div class="cart-item">
-        <div><strong>${item.nome}</strong><br>R$ ${item.preco.toFixed(2)}</div>
-        <div><button class="qty-btn dec" data-id="${item.id}">-</button> ${item.quantidade} <button class="qty-btn inc" data-id="${item.id}">+</button></div>
-        <div>R$ ${(item.preco * item.quantidade).toFixed(2)}</div>
-        <button class="remove-item" data-id="${item.id}"><i class="fas fa-trash"></i></button>
+      const subtotal = item.preco * item.qtd;
+      total += subtotal;
+      html += `<div class="carrinho-item">
+        <span>${item.nome} x${item.qtd}</span>
+        <span>R$ ${subtotal.toFixed(2)}</span>
+        <button onclick="remover(${item.id})">Remover</button>
       </div>`;
     });
-    cartContainer.innerHTML = html;
-    document.querySelectorAll('.dec').forEach(btn => btn.addEventListener('click', (e) => alterarQuantidade(parseInt(btn.dataset.id), -1)));
-    document.querySelectorAll('.inc').forEach(btn => btn.addEventListener('click', (e) => alterarQuantidade(parseInt(btn.dataset.id), 1)));
-    document.querySelectorAll('.remove-item').forEach(btn => btn.addEventListener('click', (e) => removerItem(parseInt(btn.dataset.id))));
+    div.innerHTML = html;
+    document.getElementById('total').innerHTML = `<strong>Total: R$ ${total.toFixed(2)}</strong>`;
   }
 
-  function alterarQuantidade(id, delta) {
-    const idx = carrinho.findIndex(i => i.id === id);
-    if (idx !== -1) {
-      carrinho[idx].quantidade += delta;
-      if (carrinho[idx].quantidade <= 0) carrinho.splice(idx,1);
-      atualizarCarrinhoUI();
-    }
+  function remover(id) {
+    carrinho = carrinho.filter(i => i.id !== id);
+    renderCarrinho();
   }
-  function removerItem(id) { carrinho = carrinho.filter(i => i.id !== id); atualizarCarrinhoUI(); }
-  document.getElementById('clearCartBtn').addEventListener('click', () => { carrinho = []; atualizarCarrinhoUI(); });
 
-  // ======================= CHECKOUT TRANSPARENTE =======================
-  let selectedMethod = 'pix';
-  const tabBtns = document.querySelectorAll('.tab-btn');
-  const pixArea = document.getElementById('pixArea');
-  const cardArea = document.getElementById('cardArea');
+  // ======================== PAGAMENTO ========================
+  let metodo = 'pix';
+  const mp = new MercadoPago('SUA_PUBLIC_KEY_AQUI'); // Substitua pela sua Public Key
 
-  tabBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      tabBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedMethod = btn.dataset.method;
-      if (selectedMethod === 'pix') {
-        pixArea.style.display = 'block';
-        cardArea.style.display = 'none';
-      } else {
-        pixArea.style.display = 'none';
-        cardArea.style.display = 'block';
-      }
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      metodo = tab.dataset.method;
+      document.getElementById('pix-area').style.display = metodo === 'pix' ? 'block' : 'none';
+      document.getElementById('card-area').style.display = metodo === 'card' ? 'block' : 'none';
     });
   });
 
-  const payButton = document.getElementById('payButton');
-  const statusDiv = document.getElementById('paymentStatus');
-
   async function processarPagamento() {
+    const statusDiv = document.getElementById('status');
     if (carrinho.length === 0) {
-      statusDiv.innerHTML = '<span style="color:#b85c3a;">Carrinho vazio</span>';
+      statusDiv.innerHTML = '<span style="color:red;">Adicione itens ao carrinho</span>';
       return;
     }
-    const nome = document.getElementById('customerName').value.trim();
-    const email = document.getElementById('customerEmail').value.trim();
-    if (!email || !email.includes('@')) {
-      statusDiv.innerHTML = '<span style="color:#b85c3a;">E-mail obrigatório para pagamento</span>';
+    const nome = document.getElementById('nome').value.trim();
+    const email = document.getElementById('email').value.trim();
+    if (!email) {
+      statusDiv.innerHTML = '<span style="color:red;">E-mail obrigatório</span>';
       return;
     }
-    const endereco = document.getElementById('deliveryAddress').value.trim();
+    const endereco = document.getElementById('endereco').value.trim();
     if (!endereco) {
-      statusDiv.innerHTML = '<span style="color:#b85c3a;">Informe o endereço de entrega</span>';
+      statusDiv.innerHTML = '<span style="color:red;">Endereço obrigatório</span>';
       return;
     }
 
-    const total = carrinho.reduce((s,i) => s + i.preco * i.quantidade, 0);
-    const description = `Pedido Lanchão Caraguá - ${carrinho.map(i=>`${i.quantidade}x ${i.nome}`).join(', ')}`;
+    const total = carrinho.reduce((s, i) => s + i.preco * i.qtd, 0);
+    const description = `Pedido Lanchão - ${carrinho.map(i => `${i.qtd}x ${i.nome}`).join(', ')}`;
 
     const payer = {
-      name: nome,
+      name: nome || 'Cliente',
       email: email,
-      identification: selectedMethod === 'card' ? { type: 'CPF', number: document.getElementById('docNumber').value.replace(/\D/g,'') } : undefined
     };
 
     try {
-      statusDiv.innerHTML = '<span style="color:#0079c1;">Processando pagamento...</span>';
+      statusDiv.innerHTML = '<span style="color:blue;">Processando...</span>';
 
-      if (selectedMethod === 'pix') {
+      if (metodo === 'pix') {
         const response = await fetch('/.netlify/functions/create-payment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -247,42 +181,42 @@
             type: 'pix',
             amount: total,
             description,
-            payer
+            payer,
           })
         });
         const data = await response.json();
         if (data.error) throw new Error(data.error);
-        // Exibe QR Code e código copia e cola
-        const qrCodeBase64 = data.qr_code_base64;
-        const qrCodeText = data.qr_code;
-        document.getElementById('pixQrCode').value = qrCodeText;
-        const imgDiv = document.getElementById('pixQrCodeImage');
-        if (qrCodeBase64) {
-          imgDiv.innerHTML = `<img src="data:image/png;base64,${qrCodeBase64}" alt="QR Code Pix"><br><button onclick="navigator.clipboard.writeText('${qrCodeText}')">Copiar código Pix</button>`;
-        } else {
-          imgDiv.innerHTML = `<p>Link para pagamento: <a href="${data.ticket_url}" target="_blank">Clique aqui</a></p>`;
+        if (data.qr_code_base64) {
+          document.getElementById('qr-code-container').innerHTML = `<img src="data:image/png;base64,${data.qr_code_base64}" style="max-width:200px;"><br><button onclick="navigator.clipboard.writeText('${data.qr_code}')">Copiar código Pix</button>`;
+          document.getElementById('pix-copia-cola').value = data.qr_code;
+        } else if (data.ticket_url) {
+          document.getElementById('qr-code-container').innerHTML = `<a href="${data.ticket_url}" target="_blank">Clique para pagar</a>`;
         }
-        statusDiv.innerHTML = '<span style="color:#1f7a5a;">✅ Pix gerado! Escaneie o QR Code ou copie o código. Aguarde confirmação do pagamento.</span>';
-        // Opcional: limpar carrinho após sucesso? Melhor esperar confirmação, mas vamos sugerir recarregar a página após pagamento.
+        statusDiv.innerHTML = '<span style="color:green;">✅ Pix gerado! Escaneie o QR Code e pague. O pedido será confirmado após o pagamento.</span>';
       } 
-      else if (selectedMethod === 'card') {
-        // Cartão - precisamos de tokenização do Mercado Pago
-        const mp = new MercadoPago(process.env.MP_PUBLIC_KEY || 'TEST-xxxxxxxxxxxx'); // ATENÇÃO: pública key precisa ser configurada
-        const cardNumber = document.getElementById('cardNumber').value.replace(/\D/g,'');
-        const expMonth = document.getElementById('cardExpMonth').value;
-        const expYear = document.getElementById('cardExpYear').value;
-        const cvv = document.getElementById('cardCvv').value;
+      else if (metodo === 'card') {
+        // Tokenização do cartão
+        const cardNumber = document.getElementById('cardNumber').value.replace(/\D/g, '');
+        const expMonth = document.getElementById('expMonth').value;
+        const expYear = document.getElementById('expYear').value;
+        const cvv = document.getElementById('cvv').value;
         const cardholderName = document.getElementById('cardholderName').value;
+        const docNumber = document.getElementById('docNumber').value.replace(/\D/g, '');
         const installments = parseInt(document.getElementById('installments').value) || 1;
         const paymentMethodId = document.getElementById('paymentMethodId').value;
 
-        // Criar token do cartão
+        if (!cardNumber || !expMonth || !expYear || !cvv || !cardholderName || !docNumber) {
+          throw new Error('Preencha todos os dados do cartão');
+        }
+
+        // Criar token
         const tokenResponse = await mp.fields.create('cardToken', {
           cardNumber: cardNumber,
           expirationMonth: expMonth,
           expirationYear: expYear,
           securityCode: cvv,
-          cardholderName: cardholderName
+          cardholderName: cardholderName,
+          identification: { type: 'CPF', number: docNumber }
         });
         const token = tokenResponse.id;
 
@@ -293,7 +227,7 @@
             type: 'card',
             amount: total,
             description,
-            payer,
+            payer: { ...payer, identification: { type: 'CPF', number: docNumber } },
             paymentMethodId,
             token,
             installments,
@@ -303,23 +237,22 @@
         const data = await response.json();
         if (data.error) throw new Error(data.error);
         if (data.status === 'approved') {
-          statusDiv.innerHTML = '<span style="color:#1f7a5a;">✅ Pagamento aprovado! Pedido confirmado.</span>';
+          statusDiv.innerHTML = '<span style="color:green;">✅ Pagamento aprovado! Seu pedido está confirmado.</span>';
           carrinho = [];
-          atualizarCarrinhoUI();
+          renderCarrinho();
         } else {
-          statusDiv.innerHTML = `<span style="color:#b85c3a;">❌ Pagamento ${data.status_detail || data.status}. Tente novamente.</span>`;
+          statusDiv.innerHTML = `<span style="color:red;">❌ Pagamento ${data.status_detail || data.status}. Tente novamente.</span>`;
         }
       }
     } catch (err) {
       console.error(err);
-      statusDiv.innerHTML = `<span style="color:#b85c3a;">Erro: ${err.message}</span>`;
+      statusDiv.innerHTML = `<span style="color:red;">Erro: ${err.message}</span>`;
     }
   }
 
-  payButton.addEventListener('click', processarPagamento);
-
-  renderCardapio();
-  atualizarCarrinhoUI();
+  document.getElementById('pagarBtn').addEventListener('click', processarPagamento);
+  renderProdutos();
+  renderCarrinho();
 </script>
 </body>
 </html>
