@@ -1,4 +1,4 @@
-const { MercadoPagoConfig, Preference } = require('mercadopago');
+const { MercadoPagoConfig, Payment, Preference } = require('mercadopago');
 
 exports.handler = async (event) => {
   const headers = {
@@ -7,89 +7,92 @@ exports.handler = async (event) => {
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
   };
 
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers, body: '' };
-  }
-
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers, body: '' };
   if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      headers,
-      body: JSON.stringify({ error: 'Method not allowed' }),
-    };
+    return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
   try {
     const accessToken = process.env.MP_ACCESS_TOKEN;
-    if (!accessToken) {
-      console.error('MP_ACCESS_TOKEN não configurado');
-      return {
-        statusCode: 500,
-        headers,
-        body: JSON.stringify({ error: 'Token do Mercado Pago não configurado no servidor' }),
-      };
-    }
+    if (!accessToken) throw new Error('Token não configurado');
 
-    // Inicializa o cliente (nova forma)
     const client = new MercadoPagoConfig({ accessToken });
-    const preferenceClient = new Preference(client);
+    const body = JSON.parse(event.body || '{}');
+    const { type, amount, description, payer, paymentMethodId, token, installments, issuerId } = body;
 
-    let body;
-    try {
-      body = JSON.parse(event.body || '{}');
-    } catch (err) {
+    if (!amount || amount <= 0) throw new Error('Valor inválido');
+
+    // 1. Pagamento via Pix
+    if (type === 'pix') {
+      const paymentData = {
+        body: {
+          transaction_amount: Number(amount),
+          description: description || 'Pedido Lanchão Caraguá',
+          payment_method_id: 'pix',
+          payer: {
+            email: payer.email,
+            first_name: payer.first_name || payer.name?.split(' ')[0],
+            last_name: payer.last_name || payer.name?.split(' ')[1] || '',
+            identification: payer.identification || { type: 'CPF', number: '00000000000' }
+          }
+        }
+      };
+      const paymentClient = new Payment(client);
+      const response = await paymentClient.create(paymentData);
       return {
-        statusCode: 400,
+        statusCode: 200,
         headers,
-        body: JSON.stringify({ error: 'Corpo da requisição inválido' }),
+        body: JSON.stringify({
+          status: response.status,
+          point_of_interaction: response.point_of_interaction,
+          qr_code: response.point_of_interaction?.transaction_data?.qr_code,
+          qr_code_base64: response.point_of_interaction?.transaction_data?.qr_code_base64,
+          ticket_url: response.point_of_interaction?.transaction_data?.ticket_url,
+          payment_id: response.id
+        })
       };
     }
 
-    const { items, payer, metadata, external_reference } = body;
+    // 2. Pagamento com Cartão (Crédito/Débito)
+    if (type === 'card') {
+      if (!token || !paymentMethodId) throw new Error('Dados de cartão incompletos');
 
-    if (!items || items.length === 0) {
+      const paymentData = {
+        body: {
+          transaction_amount: Number(amount),
+          description: description || 'Pedido Lanchão Caraguá',
+          payment_method_id: paymentMethodId,
+          issuer_id: issuerId,
+          installments: installments || 1,
+          token: token,
+          payer: {
+            email: payer.email,
+            first_name: payer.first_name || payer.name?.split(' ')[0],
+            last_name: payer.last_name || payer.name?.split(' ')[1] || '',
+            identification: payer.identification || { type: 'CPF', number: '00000000000' }
+          }
+        }
+      };
+      const paymentClient = new Payment(client);
+      const response = await paymentClient.create(paymentData);
       return {
-        statusCode: 400,
+        statusCode: 200,
         headers,
-        body: JSON.stringify({ error: 'Carrinho vazio' }),
+        body: JSON.stringify({
+          status: response.status,
+          id: response.id,
+          status_detail: response.status_detail
+        })
       };
     }
 
-    // Monta a preferência conforme documentação v2
-    const preferenceData = {
-      items: items.map((item) => ({
-        title: item.title,
-        quantity: Number(item.quantity),
-        unit_price: Number(item.unit_price),
-        currency_id: 'BRL',
-      })),
-      payer: {
-        name: payer?.name || 'Cliente',
-        email: payer?.email || 'cliente@email.com',
-      },
-      back_urls: {
-        success: `${process.env.URL || 'https://' + event.headers.host}/?pagamento=sucesso`,
-        failure: `${process.env.URL || 'https://' + event.headers.host}/?pagamento=falha`,
-        pending: `${process.env.URL || 'https://' + event.headers.host}/?pagamento=pending`,
-      },
-      auto_return: 'approved',
-      external_reference: external_reference || `pedido_${Date.now()}`,
-      metadata: metadata || {},
-    };
-
-    const response = await preferenceClient.create({ body: preferenceData });
-
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({ init_point: response.init_point }),
-    };
+    throw new Error('Método de pagamento inválido');
   } catch (error) {
-    console.error('Erro no Mercado Pago:', error);
+    console.error('Erro:', error);
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: error.message || 'Erro interno ao criar preferência' }),
+      body: JSON.stringify({ error: error.message || 'Erro interno' })
     };
   }
 };
