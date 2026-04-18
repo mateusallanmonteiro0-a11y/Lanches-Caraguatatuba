@@ -10,7 +10,7 @@ app.use(express.json());
 // Obtenha em: https://www.mercadopago.com.br/developers/panel
 // Use token de teste ou produção
 mercadopago.configure({
-  access_token: 'TEST-1975123236868508-041718-e04014705b9ed72ea126e55013c54ad9-2285612518'
+  access_token: 'APP_USR-6095753253612300-041813-16885509327c8bd839f39bde5b22a0b6-2285612518'
 });
 
 app.post('/create-preference', async (req, res) => {
