@@ -3,256 +3,845 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lanchão Caraguá - Checkout Transparente</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- SDK do Mercado Pago para tokenização de cartão -->
+  <title>Lanchão Caraguá | Premium Delivery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://sdk.mercadopago.com/js/v2"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-    body { background: #fefaf5; padding: 20px; }
-    .container { max-width: 1200px; margin: auto; display: flex; flex-wrap: wrap; gap: 2rem; }
-    .cardapio { flex: 2; }
-    .checkout { flex: 1.5; background: white; border-radius: 28px; padding: 1.5rem; box-shadow: 0 12px 28px rgba(0,0,0,0.08); }
-    .produto { background: white; border-radius: 20px; padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid #ffe0cc; }
-    .carrinho-item { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #eee; }
-    button { background: #d13f1f; color: white; border: none; padding: 8px 16px; border-radius: 40px; cursor: pointer; font-weight: 600; }
-    .pagamento-tabs { display: flex; gap: 10px; margin: 1rem 0; }
-    .tab { flex: 1; text-align: center; padding: 10px; background: #f0dbcf; border-radius: 40px; cursor: pointer; }
-    .tab.active { background: #d13f1f; color: white; }
-    .qr-code { text-align: center; margin-top: 1rem; }
-    input, select { width: 100%; padding: 10px; margin: 8px 0; border-radius: 18px; border: 1.5px solid #f0dbcf; }
-    .status { margin-top: 1rem; text-align: center; font-size: 0.9rem; }
-    h2 { margin-bottom: 1rem; }
+    :root {
+      --primary: #e63946;
+      --secondary: #1d3557;
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-muted: #6c757d;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    html { scroll-behavior: smooth; }
+    body { background-color: var(--bg); color: var(--secondary); line-height: 1.6; overflow-x: hidden; }
+
+    /* Header com Login Fixo */
+    .header { 
+        background: var(--primary); 
+        color: white; 
+        padding: 4rem 2rem 3rem; 
+        text-align: center; 
+        border-bottom-left-radius: 40px; 
+        border-bottom-right-radius: 40px; 
+        margin-bottom: 2rem; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        position: relative;
+    }
+
+
+
+
+.produto-card {
+    background: #ffffff;
+    border-radius: 24px;
+    border: none; /* Remova a borda sólida */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* Sombra suave */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.produto-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.produto-img {
+    border-radius: 24px 24px 0 0;
+    height: 200px;
+    transition: transform 0.5s;
+}
+
+.produto-card:hover .produto-img {
+    transform: scale(1.05); /* Zoom sutil na imagem ao passar o mouse */
+}
+    
+
+
+
+/* ADICIONAR DENTRO DO <style> */
+.alert-overlay {
+  display: none; 
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(29, 53, 87, 0.7); 
+  backdrop-filter: blur(5px); 
+  z-index: 5000;
+  align-items: center;
+  justify-content: center;
+}
+
+.alert-box {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 30px;
+  width: 90%;
+  max-width: 380px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.alert-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-top: 15px;
+  width: 100%;
+}
+
+
+    
+
+    textarea {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 12px;
+    border: 1.5px solid #eee;
+    border-radius: 12px;
+    outline: none;
+    transition: 0.3s;
+    resize: none; /* Impede que o usuário deforme o layout puxando o canto */
+    min-height: 80px; /* Aqui você controla o quão "gordinho" ele vai ser */
+    font-family: 'Poppins', sans-serif; /* Para manter a mesma fonte */
+}
+
+textarea:focus {
+    border-color: var(--primary);
+    background: #fffafa;
+}
+
+
+
+
+    /* Limita o tamanho do QR Code e centraliza */
+.qr-img {
+    max-width: 200px; /* Define um tamanho fixo razoável */
+    width: 100%;
+    height: auto;
+    margin: 0 auto;
+    display: block;
+    border-radius: 10px;
+}
+
+#qr-code-view {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #fff;
+    padding: 15px;
+    border: 1px solid #eee;
+    margin-top: 10px;
+}
+
+/* Ajuste no campo Copia e Cola para não vazar */
+#pix-copy {
+    cursor: pointer;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+    
+    
+    .top-bar {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        background: rgba(255,255,255,0.2);
+        padding: 8px 15px;
+        border-radius: 30px;
+        transition: 0.3s;
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+    .top-bar:hover { background: white; color: var(--primary); }
+
+    .container { max-width: 1100px; margin: auto; display: grid; grid-template-columns: 1fr 380px; gap: 2rem; padding: 0 20px 40px; position: relative; }
+
+    /* Mapa Flutuante */
+    #mini-mapa { position: fixed; bottom: 20px; left: 20px; width: 150px; height: 100px; border-radius: 20px; border: 3px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.2); z-index: 500; overflow: hidden; }
+
+    /* Cardápio */
+    .grid-produtos { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+    .produto-card { background: var(--card-bg); border-radius: 20px; overflow: hidden; transition: transform 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #eee; display: flex; flex-direction: column; }
+    .produto-card:hover { transform: translateY(-5px); }
+    .produto-img { width: 100%; height: 180px; object-fit: cover; }
+    .produto-info { padding: 1.2rem; flex-grow: 1; display: flex; flex-direction: column; }
+    .produto-preco { color: var(--primary); font-weight: 700; font-size: 1.2rem; display: block; margin-bottom: 10px; }
+    .btn-add { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+
+    /* Sidebar Checkout */
+    .checkout-side { background: white; border-radius: 25px; padding: 1.5rem; position: sticky; top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); height: fit-content; border: 2px solid var(--primary); }
+    .total-box { font-size: 1.4rem; font-weight: 700; text-align: center; margin: 1.5rem 0; padding: 15px; background: #fff5f5; border-radius: 15px; color: var(--primary); border: 1px dashed var(--primary); }
+
+    /* Modais Estilizados */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+    .modal-content { background: white; padding: 2.5rem; border-radius: 30px; width: 90%; max-width: 400px; text-align: center; position: relative; animation: slideUp 0.3s ease; }
+    @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .close-modal { position: absolute; top: 20px; right: 25px; font-size: 1.5rem; cursor: pointer; color: #999; }
+    .btn-guest { background: none; border: 2px solid #ddd; width: 100%; padding: 12px; border-radius: 12px; margin-top: 10px; cursor: pointer; font-weight: 600; color: #666; }
+
+    /* Rodapé */
+    .footer { background: var(--secondary); color: white; padding: 4rem 1rem 2rem; text-align: center; margin-top: 50px; }
+    .footer-content { max-width: 1100px; margin: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 3rem; text-align: left; }
+    .footer h4 { color: var(--primary); margin-bottom: 20px; font-size: 1.2rem; }
+    .social-icons i { font-size: 1.5rem; margin-right: 20px; cursor: pointer; transition: 0.3s; }
+    .social-icons i:hover { color: var(--primary); transform: scale(1.2); }
+
+    input { width: 100%; padding: 14px; margin-bottom: 12px; border: 1.5px solid #eee; border-radius: 12px; outline: none; transition: 0.3s; }
+    input:focus { border-color: var(--primary); background: #fffafa; }
+
+    @media (max-width: 850px) { 
+      .container { grid-template-columns: 1fr; }
+      #mini-mapa { width: 140px; height: 140px; }
+      .top-bar { right: 10px; padding: 5px 10px; font-size: 0.8rem; }
+    }
+
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    html { scroll-behavior: smooth; } /* Rolagem suave */
+    body { background-color: var(--bg); color: var(--secondary); line-height: 1.6; }
+
+    .header { background: var(--primary); color: white; padding: 3rem 2rem; text-align: center; border-bottom-left-radius: 40px; border-bottom-right-radius: 40px; margin-bottom: 2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+
+    .container { max-width: 1100px; margin: auto; display: grid; grid-template-columns: 1fr 380px; gap: 2rem; padding: 0 20px 40px; }
+
+    /* Menu de Produtos */
+    .grid-produtos { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+    .produto-card { background: var(--card-bg); border-radius: 20px; overflow: hidden; transition: transform 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #eee; display: flex; flex-direction: column; }
+    .produto-card:hover { transform: translateY(-5px); }
+    .produto-img { width: 100%; height: 180px; object-fit: cover; }
+    .produto-info { padding: 1.2rem; flex-grow: 1; display: flex; flex-direction: column; }
+    .produto-info h4 { font-size: 1.1rem; margin-bottom: 5px; }
+    .produto-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px; flex-grow: 1; }
+    .produto-preco { color: var(--primary); font-weight: 700; font-size: 1.2rem; display: block; margin-bottom: 10px; }
+    
+    .btn-add { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+    .btn-add:hover { filter: brightness(1.1); transform: scale(1.02); }
+
+    /* Checkout Sidebar */
+    .checkout-side { background: white; border-radius: 25px; padding: 1.5rem; position: sticky; top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); height: fit-content; border: 2px solid var(--primary); }
+    .checkout-side h3 { margin-bottom: 1rem; border-bottom: 2px solid #f8f9fa; padding-bottom: 10px; }
+    .carrinho-vazio { text-align: center; color: #888; padding: 20px; }
+    .item-carrinho { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
+    
+    .total-box { font-size: 1.4rem; font-weight: 700; text-align: center; margin: 1.5rem 0; padding: 15px; background: #fff5f5; border-radius: 15px; color: var(--primary); border: 1px dashed var(--primary); }
+
+    /* Abas de Pagamento */
+    .tabs { display: flex; gap: 10px; margin-bottom: 1.5rem; }
+    .tab { flex: 1; padding: 10px; border-radius: 10px; text-align: center; cursor: pointer; background: #eee; font-size: 0.9rem; font-weight: 600; transition: 0.3s; }
+    .tab.active { background: var(--secondary); color: white; }
+
+    input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1.5px solid #eee; border-radius: 10px; outline: none; font-size: 0.9rem; }
+    input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1); }
+    
+    .btn-finalizar { width: 100%; background: #27ae60; color: white; border: none; padding: 15px; border-radius: 15px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+    .btn-finalizar:hover { background: #219150; }
+
+    @media (max-width: 850px) { 
+      .container { grid-template-columns: 1fr; }
+      .checkout-side { position: relative; top: 0; margin-top: 2rem; }
+              }
   </style>
 </head>
 <body>
+
+
+  <div id="custom-alert" class="alert-overlay">
+  <div class="alert-box">
+    <div style="font-size: 3rem; color: var(--primary); margin-bottom: 10px;">
+      <i class="fas fa-exclamation-circle"></i>
+    </div>
+    <h3 id="alert-title">Atenção</h3>
+    <p id="alert-message" style="color: #666; margin-top: 5px;"></p>
+    <button onclick="closeAlert()" class="alert-btn">Entendido</button>
+  </div>
+  </div>
+  
+
+<header class="header">
+  <div class="top-bar" onclick="showAuth('login')">
+    <i class="fas fa-user-circle"></i>
+    <span>Minha Conta / Sair</span>
+  </div>
+  <h1>🍔 Lanchão Caraguá</h1>
+  <p>O melhor sabor do litoral direto na sua mesa</p>
+</header>
+
+
+
+
+
+
+
 <div class="container">
   <div class="cardapio">
-    <h2>🍔 Cardápio</h2>
-    <div id="produtos"></div>
+    <div class="grid-produtos" id="menu-produtos"></div>
   </div>
-  <div class="checkout">
-    <h2>🛒 Seu Pedido</h2>
-    <div id="carrinho"></div>
-    <div id="total" style="font-weight: bold; margin: 1rem 0;"></div>
-    <input type="text" id="nome" placeholder="Seu nome completo">
-    <input type="email" id="email" placeholder="Seu e-mail">
-    <input type="text" id="endereco" placeholder="Endereço de entrega">
 
-    <div class="pagamento-tabs">
-      <div class="tab active" data-method="pix">Pix</div>
-      <div class="tab" data-method="card">Cartão (Crédito/Débito)</div>
+  <div class="checkout-side" id="area-pagamento">
+    <h3>🛒 Seu Pedido</h3>
+    <div id="lista-carrinho">
+      <p class="carrinho-vazio">Seu carrinho está vazio</p>
     </div>
 
-    <div id="pix-area">
-      <div id="qr-code-container" class="qr-code"></div>
-      <input type="text" id="pix-copia-cola" readonly placeholder="Código Pix aparecerá aqui" style="background:#f9f2ec;">
+    <div class="total-box" id="total-display">R$ 0,00</div>
+
+    <div id="dados-cliente">
+      <input type="text" id="nome" placeholder="Nome Completo">
+      <input type="email" id="email" value="seuemail@exemplo.com" readonly style="display: none;">
+    
+    <input type="tel" id="número" placeholder="DDD + Número (Ex: 1299765-4321)" 
+           maxlength="11" 
+           oninput="this.value = this.value.replace(/[^0-9]/g, '');" 
+           required>
+      <input type="text" id="endereco" placeholder="Endereço Completo de Entrega" required>
+     
+     <textarea id="observação" placeholder="Adicionar observações à entrega..." rows="3"></textarea>
+      
     </div>
 
-    <div id="card-area" style="display:none;">
-      <select id="paymentMethodId">
-        <option value="visa">Visa</option>
-        <option value="master">Mastercard</option>
-        <option value="amex">American Express</option>
-        <option value="elo">Elo</option>
-        <option value="hipercard">Hipercard</option>
-      </select>
-      <input type="text" id="cardNumber" placeholder="Número do cartão" maxlength="16">
-      <div style="display: flex; gap: 10px;">
-        <input type="text" id="expMonth" placeholder="Mês (MM)" maxlength="2">
-        <input type="text" id="expYear" placeholder="Ano (AAAA)" maxlength="4">
+    <div class="tabs">
+      <div id="tab-pix" class="tab active" onclick="setMetodo('pix')">PIX</div>
+      <div id="tab-card" class="tab" onclick="setMetodo('card')">Cartão</div>
+    </div>
+
+    <div id="area-cartao" style="display:none;">
+      <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000">
+      <div style="display:flex; gap:5px">
+        <input type="text" id="expMonth" placeholder="MM" maxlength="2">
+        <input type="text" id="expYear" placeholder="AAAA" maxlength="4">
         <input type="text" id="cvv" placeholder="CVV" maxlength="4">
       </div>
-      <input type="text" id="cardholderName" placeholder="Nome no cartão">
-      <input type="text" id="docNumber" placeholder="CPF (apenas números)">
-      <input type="text" id="installments" placeholder="Parcelas" value="1">
+      <input type="text" id="docNumber" placeholder="CPF do Titular">
     </div>
 
-    <button id="pagarBtn" style="width:100%; margin-top:1rem;">Pagar Agora</button>
-    <div id="status" class="status"></div>
+    
+
+
+    <div id="area-pix" style="display:none; text-align:center;">
+    <div id="qr-code-view" style="background: #f8f9fa; padding: 10px; border-radius: 10px; margin-bottom: 10px;"></div>
+    
+    <p style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">Copia e Cola:</p>
+    
+    <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+        <input type="text" id="pix-copy" readonly 
+               style="flex: 1; margin-bottom: 0; font-size: 0.8rem; background: #eee; border: 1px solid #ddd;">
+        
+        <button onclick="copiarChave()" 
+                style="background: var(--secondary); color: white; border: none; padding: 0 15px; border-radius: 10px; cursor: pointer;">
+            <i class="fas fa-copy"></i>
+        </button>
+    </div>
+  </div>
+    
+
+    <button class="btn-finalizar" id="pagarBtn">Confirmar e Pagar</button>
+    <div id="status" style="margin-top:15px; text-align:center; font-weight:600;"></div>
   </div>
 </div>
 
+<div id="mini-mapa"></div>
+
+
+<div class="modal" id="auth-modal">
+  <div class="modal-content" id="login-box">
+    <span class="close-modal" onclick="closeAuth()">&times;</span>
+    <h3 style="margin-bottom: 20px;">Fazer Login</h3>
+    <input type="text" placeholder="E-mail">
+    <input type="password" placeholder="Senha">
+    <button class="btn-add">Entrar agora</button>
+    <button class="btn-guest" onclick="closeAuth()">Continuar sem cadastro</button>
+    <p style="margin-top: 20px; font-size: 0.85rem;">Novo por aqui? <a href="javascript:void(0)" onclick="showAuth('register')" style="color: var(--primary); font-weight:700;">Criar uma conta</a></p>
+  </div>
+
+  <div class="modal-content" id="register-box" style="display:none;">
+    <span class="close-modal" onclick="closeAuth()">&times;</span>
+    <h3 style="margin-bottom: 20px;">Criar Conta</h3>
+    <input type="text" placeholder="Nome Completo">
+    <input type="email" placeholder="E-mail">
+    <input type="password" placeholder="Crie uma Senha">
+    <input type="password" placeholder="Confirme a Senha">
+    <button class="btn-add" style="background:#27ae60;">Finalizar Cadastro</button>
+    <p style="margin-top: 20px; font-size: 0.85rem;">Já tem conta? <a href="javascript:void(0)" onclick="showAuth('login')" style="color: var(--primary); font-weight:700;">Fazer Login</a></p>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-content">
+    <div>
+      <h4>🍔 Lanchão Caraguá</h4>
+      <p>Qualidade premium e entrega ultra rápida. O lanche que você respeita, na porta da sua casa.</p>
+    </div>
+    <div>
+      <h4>Central de Vendas</h4>
+      <p><i class="fab fa-whatsapp"></i> (12) 99765-4321</p>
+      <p><i class="fas fa-phone-alt"></i> (12) 3882-0000</p>
+      <p><i class="fas fa-map-marker-alt"></i> Centro, Caraguatatuba - SP</p>
+    </div>
+    <div>
+      <h4>Redes Sociais</h4>
+      <div class="social-icons">
+        <i class="fab fa-instagram"></i>
+        <i class="fab fa-facebook-f"></i>
+        <i class="fab fa-tiktok"></i>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top: 50px; font-size: 0.8rem; opacity: 0.5;">&copy; 2026 Lanchão Caraguá. Feito com ❤️ no litoral.</p>
+</footer>
+
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  // ======================== PRODUTOS ========================
+// ADICIONAR NO INÍCIO DO <script>
+function mostrarAlerta(titulo, mensagem) {
+    document.getElementById('alert-title').innerText = titulo;
+    document.getElementById('alert-message').innerText = mensagem;
+    document.getElementById('custom-alert').style.display = 'flex';
+}
+
+function closeAlert() {
+    document.getElementById('custom-alert').style.display = 'none';
+}
+  
+
+
+
+
+
+
+    // --- 1. CONFIGURA�0�5�0�1O DO MAPA (LOJA FIXA) ---
+  const map = L.map('mini-mapa', { 
+    zoomControl: false, attributionControl: false 
+  }).setView([-23.6226, -45.4124], 16);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  
+  const lojaIcon = L.divIcon({ 
+    html: `<div style="background: #e63946; width: 32px; height: 32px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;">
+             <i class="fas fa-utensils" style="color: white; transform: rotate(45deg); font-size: 14px;"></i>
+           </div>`, 
+    className: 'dummy', iconSize: [32, 32], iconAnchor: [16, 32]
+  });
+  
+  
+  
+  L.marker([-23.6226, -45.4124], {icon: lojaIcon}).addTo(map)
+  
+
+  
+  // 2. Sistema de Troca Login/Cadastro
+  function showAuth(type) {
+    document.getElementById('auth-modal').style.display = 'flex';
+    if(type === 'login') {
+        document.getElementById('login-box').style.display = 'block';
+        document.getElementById('register-box').style.display = 'none';
+    } else {
+        document.getElementById('login-box').style.display = 'none';
+        document.getElementById('register-box').style.display = 'block';
+    }
+  }
+
+  function closeAuth() {
+    document.getElementById('auth-modal').style.display = 'none';
+  }
+
+  // 3. Lógica do Cardápio
   const produtos = [
-    { id: 1, nome: "X-Salada Especial", preco: 22.90 },
-    { id: 2, nome: "X-Bacon Supreme", preco: 28.90 },
-    { id: 3, nome: "Cheddar Duplo", preco: 32.90 },
-    { id: 4, nome: "Hot Dog Completo", preco: 16.90 },
-    { id: 5, nome: "Batata Frita com Cheddar", preco: 14.90 },
-    { id: 6, nome: "Milkshake de Chocolate", preco: 15.90 }
+    { id: 1, nome: "X-Salada Especial", preco: 25.0, desc: "Blend bovino 150g, queijo, alface e tomate.", img: "https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?w=500" },
+    { id: 2, nome: "Cheddar Bacon", preco: 32.9, desc: "Muito bacon crocante e cheddar cremoso.", img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=500" },
+    { id: 3, nome: "Batata Suprema", preco: 18.0, desc: "Batatas rústicas com queijo e bacon.", img: "https://imagens.imirante.com.br/imagens/noticias/2024/04/07/kRzVAJoNICHti4nHq0VPYtK5tBWjWOzuOgYOmJNc.jpg?w=546&h=273&crop=730%2C+365%2C+0%2C+91.5&fit=crop&fm=webp&s=df4f113b656df4b3d3f5d9631c4a2d70" },
+    
+    
+
+    
+    
+    { id: 4, nome: "Milkshake Oreo", preco: 15.0, desc: "Sorvete premium e pedaços de Oreo.", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500" },
+    
+    
+    
+            { id: 5, nome: "Coca Cola", preco: 12.0, desc: "Coca Cola 2L", img: "https://i5.walmartimages.com/asr/ecd01808-b785-4eaf-830d-81465657fa97.ed8ff2135314831c1c115a83cce1fcde.jpeg?odnHeight=768&odnWidth=768&odnBg=FFFFFF" }
   ];
+
+  function renderMenu() {
+    document.getElementById('menu-produtos').innerHTML = produtos.map(p => `
+      <div class="produto-card">
+        <img src="${p.img}" class="produto-img">
+        <div class="produto-info">
+          <h4>${p.nome}</h4>
+          <p style="font-size:0.8rem; color:#666; margin-bottom:10px;">${p.desc}</p>
+          <span class="produto-preco">R$ ${p.preco.toFixed(2)}</span>
+          <button class="btn-add" onclick="addCarrinho(${p.id})">Adicionar ao Pedido</button>
+        </div>
+      </div>
+    `).join('');
+  }
+let metodo = 'pix'; // ADICIONE ESTA LINHA AQUI
+
   let carrinho = [];
 
-  function renderProdutos() {
-    const div = document.getElementById('produtos');
-    div.innerHTML = produtos.map(p => `
-      <div class="produto">
-        <span><strong>${p.nome}</strong> - R$ ${p.preco.toFixed(2)}</span>
-        <button onclick="adicionar(${p.id})">Adicionar</button>
+
+
+  function mostrarAlerta(titulo, msg) {
+    document.getElementById('alert-title').innerText = titulo;
+    document.getElementById('alert-message').innerText = msg;
+    document.getElementById('custom-alert').style.display = 'flex';
+  }
+  function closeAlert() { document.getElementById('custom-alert').style.display = 'none'; }
+  function showAuth() { document.getElementById('auth-modal').style.display = 'flex'; }
+  function closeAuth() { document.getElementById('auth-modal').style.display = 'none'; }
+  
+
+  
+  function addCarrinho(id) {
+    const p = produtos.find(i => i.id === id);
+    carrinho.push(p);
+    atualizarCarrinho();
+    document.getElementById('area-pagamento').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function atualizarCarrinho() {
+    const lista = document.getElementById('lista-carrinho');
+    const totalDisplay = document.getElementById('total-display');
+    const total = carrinho.reduce((a, b) => a + b.preco, 0);
+    
+    if(carrinho.length === 0) {
+      lista.innerHTML = '<p class="carrinho-vazio">Seu carrinho está vazio</p>';
+      totalDisplay.innerText = "R$ 0,00";
+      return;
+    }
+
+    lista.innerHTML = carrinho.map(i => `<div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.9rem; border-bottom:1px solid #eee; padding-bottom:5px;"><span>${i.nome}</span><strong>R$ ${i.preco.toFixed(2)}</strong></div>`).join('');
+    totalDisplay.innerText = `R$ ${total.toFixed(2)}`;
+  }
+
+  renderMenu();
+
+
+
+   function renderMenu() {
+    const grid = document.getElementById('menu-produtos');
+    grid.innerHTML = produtos.map(p => `
+      <div class="produto-card">
+        <img src="${p.img}" class="produto-img" alt="${p.nome}">
+        <div class="produto-info">
+          <h4>${p.nome}</h4>
+          <p class="produto-desc">${p.desc}</p>
+          <span class="produto-preco">R$ ${p.preco.toFixed(2)}</span>
+          <button class="btn-add" onclick="addCarrinho(${p.id})">Adicionar ao Pedido</button>
+        </div>
       </div>
     `).join('');
   }
 
-  function adicionar(id) {
-    const prod = produtos.find(p => p.id === id);
-    const item = carrinho.find(i => i.id === id);
-    if (item) item.qtd++;
-    else carrinho.push({ ...prod, qtd: 1 });
-    renderCarrinho();
+  function addCarrinho(id) {
+    const item = produtos.find(p => p.id === id);
+    const jaTem = carrinho.find(c => c.id === id);
+    if(jaTem) jaTem.qtd++;
+    else carrinho.push({...item, qtd: 1});
+    
+    atualizarCarrinho();
+
+    // ROLAR PARA O PAGAMENTO
+    document.getElementById('area-pagamento').scrollIntoView({ behavior: 'smooth' });
   }
 
-  function renderCarrinho() {
-    const div = document.getElementById('carrinho');
-    if (carrinho.length === 0) {
-      div.innerHTML = 'Carrinho vazio';
-      document.getElementById('total').innerHTML = '';
+  function removerDoCarrinho(id) {
+    carrinho = carrinho.filter(i => i.id !== id);
+    atualizarCarrinho();
+  }
+
+  function atualizarCarrinho() {
+    const lista = document.getElementById('lista-carrinho');
+    const totalDisplay = document.getElementById('total-display');
+    
+    if(carrinho.length === 0) {
+      lista.innerHTML = '<p class="carrinho-vazio">Seu carrinho está vazio</p>';
+      totalDisplay.innerText = "R$ 0,00";
       return;
     }
-    let html = '';
+
     let total = 0;
-    carrinho.forEach(item => {
-      const subtotal = item.preco * item.qtd;
-      total += subtotal;
-      html += `<div class="carrinho-item">
-        <span>${item.nome} x${item.qtd}</span>
-        <span>R$ ${subtotal.toFixed(2)}</span>
-        <button onclick="remover(${item.id})">Remover</button>
-      </div>`;
-    });
-    div.innerHTML = html;
-    document.getElementById('total').innerHTML = `<strong>Total: R$ ${total.toFixed(2)}</strong>`;
+    lista.innerHTML = carrinho.map(i => {
+      total += i.preco * i.qtd;
+      return `
+        <div class="item-carrinho">
+          <div><strong>${i.qtd}x</strong> ${i.nome}</div>
+          <div>R$ ${(i.preco * i.qtd).toFixed(2)} <span onclick="removerDoCarrinho(${i.id})" style="color:red; cursor:pointer; margin-left:10px; font-weight:bold;">✄1�7</span></div>
+        </div>
+      `;
+    }).join('');
+    
+    totalDisplay.innerText = `R$ ${total.toFixed(2)}`;
   }
 
-  function remover(id) {
-    carrinho = carrinho.filter(i => i.id !== id);
-    renderCarrinho();
+  
+function setMetodo(m) {
+  metodo = m;
+  
+  // Alterna classes de estilo nos botões de aba
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById(`tab-${m}`).classList.add('active');
+
+  // Transições suaves entre áreas
+  const areaCartao = document.getElementById('area-cartao');
+  const areaPix = document.getElementById('area-pix');
+  
+  if (m === 'card') {
+    areaCartao.classList.remove('hidden');
+    areaPix.classList.add('hidden');
+  } else {
+    areaCartao.classList.add('hidden');
+    areaPix.style.display = 'none'; // Reseta o PIX até o clique em pagar
+  }
+  
+  document.getElementById('status').innerHTML = "";
+}
+
+document.getElementById('pagarBtn').addEventListener('click', async () => {
+  const status = document.getElementById('status');
+  const btn = document.getElementById('pagarBtn');
+
+  // Validação Silenciosa (sem pop-up)
+  if (carrinho.length === 0) {
+    showStatus("O carrinho está vazio. Escolha uma delícia primeiro! 🍔", "error");
+    return;
   }
 
-  // ======================== PAGAMENTO ========================
-  let metodo = 'pix';
-  const mp = new MercadoPago('SUA_PUBLIC_KEY_AQUI'); // Substitua pela sua Public Key
+  const email = document.getElementById('email').value;
+  if (!email || !email.includes('@')) {
+    showStatus("Insira um e-mail válido para receber o recibo.", "error");
+    return;
+  }
 
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      metodo = tab.dataset.method;
-      document.getElementById('pix-area').style.display = metodo === 'pix' ? 'block' : 'none';
-      document.getElementById('card-area').style.display = metodo === 'card' ? 'block' : 'none';
+  // Estado de Loading no Botão
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner"></span> Processando...`;
+  status.innerHTML = "Preparando conexão segura...";
+
+  const total = carrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
+
+  let payload = {
+    type: metodo,
+    amount: total,
+    description: "Pedido Lanchão Caraguá",
+    payer: { email: email }
+  };
+
+  if (metodo === 'card') {
+    try {
+      const tokenResp = await mp.fields.create('cardToken', {
+        cardNumber: document.getElementById('cardNumber').value,
+        expirationMonth: document.getElementById('expMonth').value,
+        expirationYear: document.getElementById('expYear').value,
+        securityCode: document.getElementById('cvv').value,
+        cardholderName: document.getElementById('nome').value,
+        identification: { type: 'CPF', number: document.getElementById('docNumber').value }
+      });
+      payload.token = tokenResp.id;
+      payload.paymentMethodId = "visa"; 
+      payload.installments = 1;
+    } catch (e) {
+      showStatus("Dados do cartão inválidos. Verifique os números.", "error");
+      resetBtn(btn);
+      return;
+    }
+  }
+
+  try {
+    const resp = await fetch('/.netlify/functions/create-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
     });
+
+    const data = await resp.json();
+
+    if (metodo === 'pix' && data.qr_code) {
+      displayPix(data);
+    } else if (data.status === 'approved') {
+      showStatus("✨ <b>Pago com sucesso!</b> Seu lanche já está na chapa.", "success");
+      carrinho = []; 
+      atualizarCarrinho();
+      btn.style.display = 'none'; // Esconde botão após sucesso
+    } else {
+      showStatus("Pagamento recusado: " + (data.status_detail || "Tente outro método"), "error");
+      resetBtn(btn);
+    }
+  } catch (err) {
+    showStatus("Erro de conexão. Verifique sua internet.", "error");
+    resetBtn(btn);
+  }
+});
+
+// Funções Auxiliares para Limpeza de Código
+function showStatus(msg, type) {
+  const status = document.getElementById('status');
+  status.className = `status-msg ${type}`;
+  status.innerHTML = msg;
+}
+
+function resetBtn(btn) {
+  btn.disabled = false;
+  btn.innerHTML = "Finalizar Pedido";
+}
+
+function displayPix(data) {
+  document.getElementById('area-pix').style.display = 'block';
+  document.getElementById('qr-code-view').innerHTML = `<img src="data:image/png;base64,${data.qr_code_base64}" class="qr-img">`;
+  document.getElementById('pix-copy').value = data.qr_code;
+  showStatus("Aguardando pagamento via PIX...", "warning");
+}
+
+
+
+
+    function setMetodo(m) {
+    metodo = m;
+    document.getElementById('tab-pix').classList.toggle('active', m === 'pix');
+    document.getElementById('tab-card').classList.toggle('active', m === 'card');
+    document.getElementById('area-cartao').style.display = m === 'card' ? 'block' : 'none';
+    document.getElementById('area-pix').style.display = 'none';
+  }
+
+  function showAuth(type) {
+    document.getElementById('auth-modal').style.display = 'flex';
+    document.getElementById('login-box').style.display = type === 'login' ? 'block' : 'none';
+    document.getElementById('register-box').style.display = type === 'register' ? 'block' : 'none';
+  }
+  function closeAuth() { document.getElementById('auth-modal').style.display = 'none'; }
+
+  document.getElementById('pagarBtn').addEventListener('click', () => {
+    if(carrinho.length === 0) return mostrarAlerta("Oops!", "Seu carrinho está vazio.");
+    const nome = document.getElementById('nome').value;
+    if(!nome) return mostrarAlerta("Atenção", "Por favor, informe seu nome.");
+    
+    document.getElementById('status').innerHTML = "<p style='color:green'>🚀 Processando seu pedido...</p>";
+    setTimeout(() => {
+        mostrarAlerta("Sucesso!", "Pedido enviado para a cozinha!");
+    }, 1500);
   });
 
-  async function processarPagamento() {
-    const statusDiv = document.getElementById('status');
-    if (carrinho.length === 0) {
-      statusDiv.innerHTML = '<span style="color:red;">Adicione itens ao carrinho</span>';
-      return;
-    }
-    const nome = document.getElementById('nome').value.trim();
-    const email = document.getElementById('email').value.trim();
-    if (!email) {
-      statusDiv.innerHTML = '<span style="color:red;">E-mail obrigatório</span>';
-      return;
-    }
-    const endereco = document.getElementById('endereco').value.trim();
-    if (!endereco) {
-      statusDiv.innerHTML = '<span style="color:red;">Endereço obrigatório</span>';
-      return;
-    }
+  renderMenu();
 
-    const total = carrinho.reduce((s, i) => s + i.preco * i.qtd, 0);
-    const description = `Pedido Lanchão - ${carrinho.map(i => `${i.qtd}x ${i.nome}`).join(', ')}`;
 
-    const payer = {
-      name: nome || 'Cliente',
-      email: email,
-    };
 
-    try {
-      statusDiv.innerHTML = '<span style="color:blue;">Processando...</span>';
 
-      if (metodo === 'pix') {
-        const response = await fetch('/.netlify/functions/create-payment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'pix',
-            amount: total,
-            description,
-            payer,
-          })
-        });
-        const data = await response.json();
-        if (data.error) throw new Error(data.error);
-        if (data.qr_code_base64) {
-          document.getElementById('qr-code-container').innerHTML = `<img src="data:image/png;base64,${data.qr_code_base64}" style="max-width:200px;"><br><button onclick="navigator.clipboard.writeText('${data.qr_code}')">Copiar código Pix</button>`;
-          document.getElementById('pix-copia-cola').value = data.qr_code;
-        } else if (data.ticket_url) {
-          document.getElementById('qr-code-container').innerHTML = `<a href="${data.ticket_url}" target="_blank">Clique para pagar</a>`;
-        }
-        statusDiv.innerHTML = '<span style="color:green;">✅ Pix gerado! Escaneie o QR Code e pague. O pedido será confirmado após o pagamento.</span>';
-      } 
-      else if (metodo === 'card') {
-        // Tokenização do cartão
-        const cardNumber = document.getElementById('cardNumber').value.replace(/\D/g, '');
-        const expMonth = document.getElementById('expMonth').value;
-        const expYear = document.getElementById('expYear').value;
-        const cvv = document.getElementById('cvv').value;
-        const cardholderName = document.getElementById('cardholderName').value;
-        const docNumber = document.getElementById('docNumber').value.replace(/\D/g, '');
-        const installments = parseInt(document.getElementById('installments').value) || 1;
-        const paymentMethodId = document.getElementById('paymentMethodId').value;
 
-        if (!cardNumber || !expMonth || !expYear || !cvv || !cardholderName || !docNumber) {
-          throw new Error('Preencha todos os dados do cartão');
-        }
 
-        // Criar token
-        const tokenResponse = await mp.fields.create('cardToken', {
-          cardNumber: cardNumber,
-          expirationMonth: expMonth,
-          expirationYear: expYear,
-          securityCode: cvv,
-          cardholderName: cardholderName,
-          identification: { type: 'CPF', number: docNumber }
-        });
-        const token = tokenResponse.id;
 
-        const response = await fetch('/.netlify/functions/create-payment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'card',
-            amount: total,
-            description,
-            payer: { ...payer, identification: { type: 'CPF', number: docNumber } },
-            paymentMethodId,
-            token,
-            installments,
-            issuerId: null
-          })
-        });
-        const data = await response.json();
-        if (data.error) throw new Error(data.error);
-        if (data.status === 'approved') {
-          statusDiv.innerHTML = '<span style="color:green;">✅ Pagamento aprovado! Seu pedido está confirmado.</span>';
-          carrinho = [];
-          renderCarrinho();
-        } else {
-          statusDiv.innerHTML = `<span style="color:red;">❌ Pagamento ${data.status_detail || data.status}. Tente novamente.</span>`;
-        }
-      }
-    } catch (err) {
-      console.error(err);
-      statusDiv.innerHTML = `<span style="color:red;">Erro: ${err.message}</span>`;
-    }
+  document.getElementById('pagarBtn').addEventListener('click', async () => {
+  const status = document.getElementById('status');
+  const btn = document.getElementById('pagarBtn');
+
+  // 1. CAPTURA DOS CAMPOS
+  const nome = document.getElementById('nome').value.trim();
+  const telefone = document.getElementById('número').value.trim();
+  const endereco = document.getElementById('endereco').value.trim();
+  const email = document.getElementById('email').value.trim();
+
+  // 2. VALIDAÇÃO OBRIGATÓRIA
+  if (carrinho.length === 0) {
+    mostrarAlerta("Carrinho Vazio", "Adicione pelo menos um item antes de pagar.");
+    return;
   }
 
-  document.getElementById('pagarBtn').addEventListener('click', processarPagamento);
-  renderProdutos();
-  renderCarrinho();
+  if (nome === "" || telefone === "" || endereco === "") {
+    mostrarAlerta("Campos Incompletos", "Por favor, preencha Nome, Telefone e Endereço para entrega.");
+    return;
+  }
+
+  // Se passou na validação, começa o processo de pagamento
+  btn.disabled = true;
+  btn.innerHTML = `Processando...`;
+
+  const total = carrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
+
+  let payload = {
+    type: metodo,
+    amount: total,
+    description: "Pedido Lanchão Caraguá",
+    payer: { 
+      email: email,
+      first_name: nome,
+      phone: { number: telefone }
+    },
+    metadata: { endereco_entrega: endereco } // Opcional: envia o endereço para o log do MP
+  };
+
+  // ... (restante da sua lógica de fetch para o Netlify)
+  try {
+    const resp = await fetch('/.netlify/functions/create-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await resp.json();
+
+    if (metodo === 'pix' && data.qr_code) {
+      displayPix(data); // O QR Code só será montado aqui após o sucesso da API
+    } 
+    // ... restante do código
+  } catch (err) {
+    showStatus("Erro ao conectar com o servidor.", "error");
+    resetBtn(btn);
+  }
+});
+
+
+
+  function copiarChave() {
+    const inputPix = document.getElementById('pix-copy');
+    
+    if (inputPix.value === "") return;
+
+    // Seleciona o texto
+    inputPix.select();
+    inputPix.setSelectionRange(0, 99999); // Para dispositivos móveis
+
+    // Copia para a área de transferência
+    navigator.clipboard.writeText(inputPix.value).then(() => {
+        // Feedback visual para o usuário
+        const btn = event.currentTarget; // Pega o botão clicado
+        const originalIcon = btn.innerHTML;
+        
+        btn.innerHTML = '<i class="fas fa-check"></i>'; // Muda para check
+        btn.style.background = "#27ae60"; // Muda para verde
+        
+        mostrarAlerta("Copiado!", "Chave PIX copiada para a área de transferência.");
+
+        // Volta ao normal depois de 2 segundos
+        setTimeout(() => {
+            btn.innerHTML = originalIcon;
+            btn.style.background = "var(--secondary)";
+        }, 2000);
+    }).catch(err => {
+        console.error('Erro ao copiar: ', err);
+    });
+  }
+  
+  
 </script>
 </body>
 </html>
+
+
